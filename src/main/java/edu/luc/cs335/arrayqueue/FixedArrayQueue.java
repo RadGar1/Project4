@@ -15,11 +15,14 @@ public class FixedArrayQueue<E> implements SimpleQueue<E> {
 
   private final E[] data;
 
-  // TODO why do we need an explicit constructor?
+  // We need an explicit constructor to initialize the queue with a specific capacity
+  // and to set up the initial state of the queue (size, front, rear, and data array)
 
   @SuppressWarnings("unchecked")
   public FixedArrayQueue(final int capacity) {
-    // TODO check argument validity
+    if (capacity <= 0) {
+      throw new IllegalArgumentException("Capacity must be positive");
+    }
 
     this.capacity = capacity;
     this.data = (E[]) new Object[capacity];
@@ -30,35 +33,43 @@ public class FixedArrayQueue<E> implements SimpleQueue<E> {
 
   @Override
   public boolean offer(final E obj) {
-    // TODO
-
-    return false;
-  }
-
-  @Override
-  public E peek() {
-    // TODO
-
-    return null;
-  }
-
-  @Override
-  public E poll() {
-    // TODO
-
-    return null;
-  }
-
-  @Override
-  public boolean isEmpty() {
-    // TODO
+    if (isFull()) {
+      return false;
+    }
+    rear = (rear + 1) % capacity;
+    data[rear] = obj;
+    size++;
     return true;
   }
 
   @Override
+  public E peek() {
+    if (isEmpty()) {
+      return null;
+    }
+    return data[front];
+  }
+
+  @Override
+  public E poll() {
+    if (isEmpty()) {
+      return null;
+    }
+    E item = data[front];
+    data[front] = null; // clear the reference
+    front = (front + 1) % capacity;
+    size--;
+    return item;
+  }
+
+  @Override
+  public boolean isEmpty() {
+    return size == 0;
+  }
+
+  @Override
   public boolean isFull() {
-    // TODO
-    return false;
+    return size == capacity;
   }
 
   @Override
@@ -73,9 +84,10 @@ public class FixedArrayQueue<E> implements SimpleQueue<E> {
 
   @Override
   public List<E> asList() {
-    // TODO implement using an ArrayList preallocated with the right size
-    final ArrayList<E> result = null;
-    
+    final ArrayList<E> result = new ArrayList<>(size);
+    for (int i = 0; i < size; i++) {
+      result.add(data[(front + i) % capacity]);
+    }
     return result;
   }
 }
